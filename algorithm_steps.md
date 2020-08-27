@@ -1,3 +1,5 @@
+## Introduction
+This document describes the steps that went into creating the functions that generate the nSOFA dataset in [functions.R](functions.R). These steps were specifically created to transform data received from the University of Florida Integrated Data Repository. Thus, every step may not be necessary for data from a different source. Please review your data to determine which of these steps are necessary.
 
 ## Child Encounter
 1. When a subject has multiple encouters choose the first encounter
