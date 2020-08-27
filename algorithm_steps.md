@@ -31,7 +31,7 @@ The function `align_drug_start_end_times` depends on the data quality so some pa
 It can be refactored to work with other datasets. View [transformation.pdf](transformation.pdf) for an example of how the data is transformed. It does the following:
 
 1. Ensures that `med_order_datetime` occurs before `med_order_end_datetime`
-1. Handles overlapping `med_order_datetime` and `med_order_end_datetime`
+1. Handles conflicting `med_order_datetime` and `med_order_end_datetime`
 1. Sets a value of 1 when the subject is on a given medication and 0 if no medications are present
 
 ## Steroids
@@ -74,7 +74,7 @@ number_inotropic_drugs > 1 then inotorpe_score = 3
 
 #### Determine intubation devices
 1. Read categorized_respiratory_devices.xlsx and filter to intubated in yes or no to create `respiratory_devices` dataset.
-This file contains devices that represent intubation and may change based on the raw data obtained from different sources.
+This file contains devices that represent intubation based on the data received from the UF IDR. If necessary, update the file to match intubated devices from a different data source.
 
 #### Transform flowsheets dataset
 1. Read flowsheets data
@@ -88,13 +88,10 @@ This file contains devices that represent intubation and may change based on the
 flowsheet_group = "Oxygenation"
 and disp_name = "meas_value"
 ```
-1. Inner join `respiratory_devices` using meas_value as the primary key
-1. Choose the max recorded_time within a `q1hr`
-1. Arrange by `mrn`, `q1hr` and descending intubated
-1. Choose distinct rows based on `mrn` and `q1hr`
-1. Join child_encounter using `mrn` and `q1hr` as the primary keys
-1. Group by mrn
-1. Replace empty values of `meas_value` and `intubated` with the last recorded value for that field
+1. Inner join `respiratory_devices` using `meas_value` as the primary key. This join identifies if a subject was intubated or not during a given hour.
+1. Choose the last recorded value within an hour to ensure that no subject has multiple values within an hour
+1. Join child_encounter using `mrn` and `q1hr` as the primary keys 
+1. Replace empty values of `meas_value` and `intubated` with the last recorded value for that field. This determines whether a subject was intubated or not for every hour during the encounter.
 
 #### FiO2 
 1. Use transformed flowsheets data
