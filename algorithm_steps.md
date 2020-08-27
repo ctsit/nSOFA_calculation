@@ -1,5 +1,5 @@
 ## Introduction
-This document describes the steps that went into creating the functions that generate the nSOFA dataset in [functions.R](functions.R). These steps were specifically created to transform data received from the University of Florida Integrated Data Repository. Thus, every step may not be necessary for data from a different source. Please review your data to determine which of these steps are necessary.
+This document describes the steps that went into creating the functions that generate the nSOFA dataset in [functions.R](functions.R). These steps were specifically created to transform data received from the University of Florida Integrated Data Repository (IDR). Thus, every step may not be necessary for data from a different source. Please review your data to determine which of these steps are necessary.
 
 ## Child Encounter
 1. When a subject has multiple encouters choose the first encounter
@@ -9,6 +9,7 @@ This document describes the steps that went into creating the functions that gen
 1. Create `q1hr` timepoints for every hour between admit and discharge datetime
 
 ## Platelets
+1. Read labs file
 1. Choose only subjects that are in the `child_encounter` dataset
 1. Filter
 ```
@@ -29,7 +30,7 @@ and lab_result contains a digit
 
 
 ## Transform Medication Data
-The function `align_drug_start_end_times` depends on the data quality so some parts may be optional. It's purpose is to transform the medications file to assist with creating the inotropes and steroids datasets. This function was built to transform the data obtained from the University of Florida Integrated Data Repository. 
+The function `align_drug_start_end_times` depends on the data quality so some parts may be optional. It's purpose is to transform the medications file to assist with creating the inotropes and steroids datasets. This function was built to transform the data obtained from the UF IDR. 
 It can be refactored to work with other datasets. View [transformation.pdf](transformation.pdf) for an example of how the data is transformed. It does the following:
 
 1. Ensures that `med_order_datetime` occurs before `med_order_end_datetime`
@@ -47,7 +48,7 @@ and mar_action is not NA
 ```   
 1. Extract the first word of `med_order_desc`. i.e. "HYDROCORTISONE PEDIATRIC INJ DOSE < 5MG UF" will be converted to HYDROCORTISONE.
 1. Align drug start and end times
-1. Create field named `number_steroids` by summing DEXAMETHASONE, HYDROCORTISONE & METHYLPREDNISOLONE
+1. Create field named `number_steroids` which represents the number of steroids a subject is on during an hour
 1. Create field named `steroids` by using the following logic
 ```
 number_steroids = 0 then steroids = 0
@@ -64,7 +65,7 @@ and med_order_route = "Intravenous"
 ```
 1. Extract the first word of `med_order_desc`
 1. Align drug start end times
-1. Create a field named `number_inotropic_drugs` by summing DOBUTAMINE, DOPAMINE, EPINEPHRINE, MILRINONE, NOREPINEPHRINE, VASOPRESSIN & PHENYLEPHRINE for each row
+1. Create a field named `number_inotropic_drugs` which represents the number of inotropes a subject is on during an hour
 1. Create field named `inotrope_score` using the following logic
 ```
 number_inotropic_drugs = 0 then inotrope_score = 0,
