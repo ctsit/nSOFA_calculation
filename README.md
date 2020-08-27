@@ -14,7 +14,7 @@ The following packages are needed to run the script:
     openxlsx
     readxl
    
-__Note that the packages and their required dependencies needed to run the scripts will be automatically installed via the Pacman package__
+__Note The dependency management system [renv](https://rstudio.github.io/renv/articles/renv.html) is used to ensure the packages and their required dependencies specific to this project are installed.__
 
 ## About the Data 
 The data was acquired from the University of Florida Integrated Data Repository (IDR) under the aegis of IRB #201902780. The principal investigator on this IRB is James L Wynn, MD. The data sets are exports from the IDR's Epic Clarity system.
