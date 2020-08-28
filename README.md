@@ -31,3 +31,8 @@ To use the data, download the files in [`https://www.dropbox.com/sh/z3yabq5vmvpt
 
 ## Score Calculation
 ![](nsofa_table.png)
+
+
+## Developer Notes
+
+Software developers who would like to make contributions to this repository should read the [Developer Notes](developer_notes.md)
