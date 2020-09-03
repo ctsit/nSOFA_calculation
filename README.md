@@ -14,7 +14,7 @@ The following packages are needed to run the scripts:
     openxlsx
     readxl
    
-__Note The dependency management system [renv](https://rstudio.github.io/renv/articles/renv.html) is used to ensure the packages and their required dependencies are installed.__
+__Note: The dependency management system [renv](https://rstudio.github.io/renv/articles/renv.html) is used to ensure that specific package versions and their required dependencies are installed. See [collaborating with renv](https://rstudio.github.io/renv/articles/collaborating.html) for instructions  on how to restore the project library locally.__
 
 ## About the Data 
 The data was acquired from the University of Florida Integrated Data Repository (IDR) under the aegis of IRB #201902780. The principal investigator on this IRB is James L Wynn, MD. The data sets are exports from the IDR's Epic Clarity system.
