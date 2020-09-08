@@ -16,7 +16,26 @@ oxygenation <- get_oxygenation()
 # use create_csv = TRUE to create csv file
 nsofa_scores <- get_nsofa_dataset(create_csv = FALSE)
 
-max_score <- get_max_score_within_n_days_of_birth(n_days = 28, 
-                                                  create_csv = FALSE)
+
+max_score_within_24_hrs <- get_max_score_within_n_hours_of_admission(
+  min_hour = 1,
+  max_hour = 24,
+  "max_score_within_24_hrs",
+  create_csv = TRUE
+)
+
+max_score_between_3_and_24_hrs <- get_max_score_within_n_hours_of_admission(
+  min_hour = 3,
+  max_hour = 24,
+  "max_score_between_3_and_24_hrs",
+  create_csv = TRUE
+)
+
+max_score_within_28_days <- get_max_score_within_n_hours_of_admission(
+  min_hour = 1,
+  max_hour = 672,
+  "max_score_within_28_days",
+  create_csv = TRUE
+)
 
 
