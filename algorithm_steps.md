@@ -30,8 +30,7 @@ and lab_result contains a digit
 
 
 ## Transform Medication Data
-The function `align_drug_start_end_times` depends on the data quality so some parts may be optional. It's purpose is to transform the medications file to assist with creating the inotropes and steroids datasets. This function was built to transform the data obtained from the UF IDR. 
-It can be refactored to work with other datasets. View [transformation.pdf](transformation.pdf) for an example of how the data is transformed. It does the following:
+The function `align_drug_start_end_times` depends on the data quality so some parts may be optional. It's purpose is to transform the medications file to assist with creating the inotropes and steroids datasets. This function was built to transform the data obtained from the UF IDR and can be refactored to work with other datasets. It does the following:
 
 1. Ensures that `med_order_datetime` occurs before `med_order_end_datetime`
 1. Handles conflicting `med_order_datetime` and `med_order_end_datetime`
