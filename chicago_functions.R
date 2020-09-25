@@ -19,7 +19,7 @@ get_data <- function(file_name){
 # Child Encounter ---------------------------------------------------------
 
 expand_child_encounter <- function() {
-  child_encounter <- get_data("child_encounter_data.csv") %>%  
+  child_encounter <- get_data("child_encounter_data.csv") %>% 
     # choose first encounter when a subject has multiple encounters
     arrange(child_mrn_uf, admit_datetime) %>%  
     distinct(child_mrn_uf, .keep_all = T) %>% 
@@ -165,8 +165,8 @@ get_oxygenation <- function() {
   flowsheets <- get_data("child_flowsheets.csv") %>%
     filter(child_mrn_uf %in% child_encounter$child_mrn_uf) %>% 
     group_by(child_mrn_uf) %>% 
-    mutate(q1hr = floor_date(recorded_time, "1 hour"))
-  
+    mutate(q1hr = floor_date(recorded_time, "1 hour")) 
+    
   intubated_yes_no <- flowsheets %>% 
     filter(flowsheet_group == "Oxygenation" & 
              disp_name == "Respiratory Device") %>%
@@ -219,7 +219,7 @@ get_oxygenation <- function() {
   
   intubated_yes <- combined_intubation %>% 
     mutate_at(vars(c(meas_value_fio2, meas_value_spo2)), as.numeric) %>% 
-    mutate(oxygenation_ratio = meas_value_fio2/meas_value_spo2) %>% 
+    mutate(oxygenation_ratio = meas_value_spo2/meas_value_fio2) %>% 
     mutate(oxygenation = case_when(oxygenation_ratio >= 3 ~ 0,
                                    oxygenation_ratio >= 2 ~ 2,
                                    oxygenation_ratio >= 1.5 ~ 4,
