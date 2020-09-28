@@ -19,7 +19,7 @@ __Note: The dependency management system [renv](https://rstudio.github.io/renv/a
 ## About the Data 
 The data was acquired from the University of Florida Integrated Data Repository (IDR) under the aegis of IRB #201902780. The principal investigator on this IRB is James L Wynn, MD. The data sets are exports from the IDR's Epic Clarity system.
 
-To use the data, download the files in [`https://www.dropbox.com/sh/z3yabq5vmvptoq7/AABmmkYWXqIWQRx_JLVfSlIMa?dl=0`](https://www.dropbox.com/sh/z3yabq5vmvptoq7/AABmmkYWXqIWQRx_JLVfSlIMa?dl=0) and [`https://www.dropbox.com/s/d7lu2942ig5jb0r/categorized_respiratory_devices.xlsx?dl=0`](https://www.dropbox.com/s/d7lu2942ig5jb0r/categorized_respiratory_devices.xlsx?dl=0) and copy into the data folder. If you do not have access to the dropbox folder, please request access from [pbc@ufl.edu](mailto:pbc@ufl.edu),  [lawjames1@ufl.edu](mailto:lawjames1@ufl.edu) or [james.wynn@peds.ufl.edu](mailto:james.wynn@peds.ufl.edu).
+
 
 ## Current Scripts
 - [`functions.R`](functions.R): contains the data transformation functions used to create the nsofa components. [algorithm_steps.md](algorithm_steps.md) contains the steps for constructing these functions.
