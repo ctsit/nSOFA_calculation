@@ -297,16 +297,22 @@ get_nsofa_dataset <- function(create_csv = FALSE) {
   return(nsofa)
 }
   
-get_max_score_within_n_days_of_birth <- function(n_days, create_csv = FALSE) {
+get_max_score_within_n_hours_of_admission <- function(min_hour,
+                                                      max_hour, 
+                                                      filename = NULL,
+                                                      create_csv = FALSE) {
   max_score <- nsofa_scores %>% 
     group_by(child_mrn_uf) %>% 
-    filter(between(unique(child_birth_date), unique(child_birth_date), 
-                   unique(child_birth_date) + days(n_days))) %>% 
+    arrange(q1hr) %>% 
+    # every row represents an hour
+    mutate(hour = 1:n()) %>%   
+    filter(between(hour, min_hour, max_hour)) %>%   
     summarise(nsofa_score = max(nsofa_score), 
+              number_hours_in_encounter = max(hour),
               dischg_disposition = unique(dischg_disposition))
   
   if (create_csv) {
-    write.csv(max_score, here("output", paste0("max_nsofa_score_", today(), ".csv")), 
+    write.csv(max_score, here("output", paste0(filename,"_", today(), ".csv")), 
               row.names = F, na = "")
   }
   

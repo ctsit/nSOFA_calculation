@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file. There was a
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2020-09-28
+
+### Added
+- Add get_max_score_within_n_hours_of_admission (Laurence James-Woodley)
+
+### Changed
+- Remove option to request data access in README
+
 ## [2.1.0] - 2020-09-08
 
 ### Added
