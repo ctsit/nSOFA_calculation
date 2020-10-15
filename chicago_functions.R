@@ -61,12 +61,13 @@ get_platelets <- function() {
   return(platelets)
 }
 
+
 # align drug start and end times  ------------------------------------------
-
-
 align_drug_start_end_times <- function(df) {
   aligned_times <- df %>% 
-    filter(med_order_start_datetime < med_order_datetime) %>% 
+    # the drug must be started after it is ordered
+    filter(med_order_start_datetime > med_order_datetime) %>% 
+    # the drug must be started in order for it to end
     filter(med_order_start_datetime < med_order_end_datetime) %>%
     select(child_mrn_uf,med_order_desc, med_order_start_datetime, med_order_end_datetime) %>%          
     group_by(child_mrn_uf, med_order_desc) %>% 
@@ -192,9 +193,11 @@ get_oxygenation <- function() {
                  filter(intubated == 'yes') %>%
                  select(child_mrn_uf, q1hr),
                by = c("child_mrn_uf", "q1hr")) %>%  
-    select(child_mrn_uf, recorded_time, q1hr, flowsheet_group, meas_value, disp_name) %>% 
-    distinct() %>%   
-    arrange(recorded_time) 
+    select(child_mrn_uf, q1hr, meas_value, disp_name) %>% 
+    # Choose highest fio2 score when there are multiple within an hour
+    arrange(child_mrn_uf, q1hr, desc(meas_value)) %>% 
+    distinct(child_mrn_uf, q1hr, .keep_all = T) %>%   
+    mutate(disp_name = "fio2")
   
   spo2_score <- flowsheets %>%
     filter(flowsheet_group == "Vitals" & str_detect(disp_name, "SpO2")) %>% 
@@ -203,33 +206,30 @@ get_oxygenation <- function() {
                  filter(intubated == 'yes') %>%
                  select(child_mrn_uf, q1hr),
                by = c("child_mrn_uf", "q1hr")) %>%  
-    select(child_mrn_uf, recorded_time, q1hr, flowsheet_group, meas_value, disp_name) %>% 
-    distinct()   
+    select(child_mrn_uf, q1hr, meas_value, disp_name) %>%  
+    # choose lowest spo2 when there are multiple values within an hour
+    arrange(child_mrn_uf, q1hr, meas_value) %>% 
+    distinct(child_mrn_uf, q1hr, .keep_all = T) %>%   
+    mutate(disp_name = "spo2")
   
-  combined_intubation <- spo2_score %>% 
-    inner_join(fio2_score, by = c("child_mrn_uf", "q1hr"),
-               suffix = c("_spo2", "_fio2")) %>%  
-    filter(recorded_time_spo2 == recorded_time_fio2) %>% 
-    drop_na(meas_value_fio2, meas_value_spo2) %>%       
-    select(child_mrn_uf, q1hr, starts_with("recorded_time"), starts_with("meas")) %>% 
+  intubated_yes <- fio2_score %>% 
+    bind_rows(spo2_score) %>% 
     group_by(child_mrn_uf) %>% 
-    arrange(q1hr) %>% 
-    distinct() %>% 
-    ungroup()
-  
-  intubated_yes <- combined_intubation %>% 
-    mutate_at(vars(c(meas_value_fio2, meas_value_spo2)), as.numeric) %>% 
-    mutate(oxygenation_ratio = meas_value_spo2/meas_value_fio2) %>% 
+    # convert fio2 and spo2 to columns
+    pivot_wider(names_from = disp_name, values_from = meas_value) %>%  
+    arrange(child_mrn_uf, q1hr) %>% 
+    mutate(spo2 = if_else(!is.na(fio2) & is.na(spo2), "999", spo2)) %>% 
+    fill(c(fio2, spo2), .direction = "down") %>% 
+    mutate(spo2 = if_else(spo2 == "999", NA_character_, spo2)) %>% 
+    mutate_at(vars(fio2, spo2), as.numeric) %>% 
+    mutate(oxygenation_ratio = spo2/fio2) %>% 
     mutate(oxygenation = case_when(oxygenation_ratio >= 3 ~ 0,
-                                   oxygenation_ratio >= 2 ~ 2,
-                                   oxygenation_ratio >= 1.5 ~ 4,
-                                   oxygenation_ratio >= 1 ~ 6,
-                                   oxygenation_ratio < 1 ~ 8,
-                                   TRUE ~ NA_real_)) %>% 
-    # take lowest oxygenation value when there are multiple within an hour
-    arrange(child_mrn_uf, q1hr, oxygenation) %>%  
-    distinct(child_mrn_uf, q1hr, .keep_all = T)
-  
+                                 oxygenation_ratio >= 2 ~ 2,
+                                 oxygenation_ratio >= 1.5 ~ 4,
+                                 oxygenation_ratio >= 1 ~ 6,
+                                 oxygenation_ratio < 1 ~ 8,
+                                 TRUE ~ 0)) 
+ 
   intubated_no <- intubated_yes_no %>% 
     filter(intubated == 'no') %>% 
     mutate(oxygenation = 0)
@@ -238,8 +238,8 @@ get_oxygenation <- function() {
     bind_rows(intubated_no) %>%
     select(child_mrn_uf,
            q1hr,
-           fio2 = meas_value_fio2,
-           spo2 = meas_value_spo2,
+           fio2,
+           spo2,
            oxygenation) %>%
     arrange(child_mrn_uf, q1hr)
   
