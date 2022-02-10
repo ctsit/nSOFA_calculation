@@ -28,7 +28,7 @@ expand_child_encounter <- function() {
     select(child_mrn_uf, admit_datetime, child_birth_date,
            dischg_disposition, dischg_datetime) %>% 
     # create q1hr timepoints 
-    expand(child_mrn_uf, child_birth_date, dischg_disposition, admit_datetime,
+    expand(child_birth_date, dischg_disposition, admit_datetime,
            dischg_datetime,
            q1hr = seq(floor_date(admit_datetime, "1 hour"), 
                       floor_date(dischg_datetime, "1 hour"), 
