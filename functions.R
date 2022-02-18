@@ -28,7 +28,7 @@ expand_child_encounter <- function() {
     select(child_mrn_uf, admit_datetime, child_birth_date,
            dischg_disposition, dischg_datetime) %>% 
     # create q1hr timepoints 
-    expand(child_mrn_uf, child_birth_date, dischg_disposition, admit_datetime,
+    expand(child_birth_date, dischg_disposition, admit_datetime,
            dischg_datetime,
            q1hr = seq(floor_date(admit_datetime, "1 hour"), 
                       floor_date(dischg_datetime, "1 hour"), 
@@ -285,9 +285,7 @@ get_nsofa_dataset <- function(create_csv = FALSE) {
                           (number_inotropic_drugs >= 2 & steroids == 0) | 
                             (number_inotropic_drugs == 1 & steroids == 1) ~ 3,
                           number_inotropic_drugs >= 2 & steroids == 1 ~ 4)) %>% 
-    mutate(nsofa_score = platelets + oxygenation + cv) %>% 
-    select(child_mrn_uf,dischg_disposition,child_birth_date, q1hr, inotrope_score,
-           number_inotropic_drugs, oxygenation, platelets, steroids, cv, nsofa_score)
+    mutate(nsofa_score = platelets + oxygenation + cv) 
   
   if (create_csv) {
     write.csv(nsofa, here("output", paste0("nsofa_score_", today(), ".csv")), 

@@ -24,13 +24,27 @@ The data was acquired from the University of Florida Integrated Data Repository 
 ## Current Scripts
 - [`functions.R`](functions.R): contains the data transformation functions used to create the nsofa components. [algorithm_steps.md](algorithm_steps.md) contains the steps for constructing these functions.
 
-- [`make_nsofa_dataset.R`](make_nsofa_dataset.R): creates a dataset of q1hr nsofa scores and a dataset of the max nsofa score within n days of birth
+- [`make_nsofa_dataset.R`](make_nsofa_dataset.R): creates a dataset of q1hr nsofa scores and a dataset of the max nsofa score within n days of birth. Also creates three CSV datasets of nSOFA Scores, VIS Scores, and drugs into the files `output/nsofa_summary.csv`, `output/nsofa_drug_summary.csv`, and `output/nsofa_vis_summary.csv`.
 
 - [`count_and_categorize_respiratory_devices.R`](count_and_categorize_respiratory_devices.R): created the initial version of `categorized_respiratory_devices.xlsx`. This file is used to categorize respiratory devices as indicating that a child is intubated or _not_ intubated. The version of `categorized_respiratory_devices.xlsx` used in these calculation was reviwed and updated by James Wynn.
 
 
 ## Score Calculation
 ![](nsofa_table.png)
+
+
+## Vasoactive-Inotropic Score (VIS)
+
+The Vasoactive-Inotropic Score (VIS) is calculated according to this equation.
+
+```
+VIS = dopamine dose (μg/kg/min) +
+      dobutamine dose (μg/kg/min) +
+      10 x milrinone dose (μg/kg/min) +
+      10 x vasopressin dose (mU/kg/min) +
+      100 x epinephrine dose (μg/kg/min) +
+      100 x norepinephrine dose (μg/kg/min)
+```
 
 
 ## Developer Notes
