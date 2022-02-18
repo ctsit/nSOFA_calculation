@@ -113,6 +113,6 @@ vis_summary <- nsofa_scores %>%
   select(-contains("above_zero"))
 
 write_csv(nsofa_summary, "output/nsofa_summary.csv")
-write_csv(drug_summary, "output/nsofa_drug_summary.csv")
+write_csv(drug_dose_summary, "output/nsofa_drug_summary.csv")
 write_csv(vis_summary, "output/nsofa_vis_summary.csv")
 
