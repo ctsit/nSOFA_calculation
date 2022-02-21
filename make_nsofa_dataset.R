@@ -3,23 +3,42 @@ source("functions.R")
 # load necessary packages
 load_libraries()
 
-child_encounter <- expand_child_encounter()
+cohort <- "picu"
 
-platelets <- get_platelets()
+respiratory_devices <- read_excel(here("data", "categorized_respiratory_devices.xlsx")) %>% 
+  filter(intubated %in% c('yes', 'no'))
 
-steroids <- get_steroids()
+read_child_encounter <- read_csv(here("data", cohort, "encounter.csv")) %>%
+  clean_names() %>%
+  filter(!is.na(dischg_datetime))
 
-inotropes <- get_inotropes()
+child_encounter <- expand_child_encounter(read_child_encounter)
 
-oxygenation <- get_oxygenation()
+read_child_labs <- read_csv(here("data", cohort, "labs.csv")) %>%
+  clean_names()
+
+read_medications <- read_csv(here("data", cohort, "medications.csv")) %>%
+  clean_names() 
+
+read_flowsheets <- read_csv(here("data", cohort, "flowsheets.csv")) %>%
+  clean_names() 
+  
+platelets <- get_platelets(read_child_labs, child_encounter)
+
+steroids <- get_steroids(read_medications, child_encounter)
+
+inotropes <- get_inotropes(read_medications, child_encounter)
+
+oxygenation <- get_oxygenation(read_flowsheets, respiratory_devices)
 
 # use create_csv = TRUE to create csv file
-nsofa_scores <- get_nsofa_dataset(create_csv = FALSE)
+nsofa_scores <- get_nsofa_dataset(cohort, create_csv = FALSE)
 
 
 max_score_within_24_hrs <- get_max_score_within_n_hours_of_admission(
   min_hour = 1,
   max_hour = 24,
+  cohort = cohort,
   "max_score_within_24_hrs",
   create_csv = TRUE
 )
@@ -27,6 +46,7 @@ max_score_within_24_hrs <- get_max_score_within_n_hours_of_admission(
 max_score_between_3_and_24_hrs <- get_max_score_within_n_hours_of_admission(
   min_hour = 3,
   max_hour = 24,
+  cohort = cohort,
   "max_score_between_3_and_24_hrs",
   create_csv = TRUE
 )
@@ -34,6 +54,7 @@ max_score_between_3_and_24_hrs <- get_max_score_within_n_hours_of_admission(
 max_score_within_28_days <- get_max_score_within_n_hours_of_admission(
   min_hour = 1,
   max_hour = 672,
+  cohort = cohort,
   "max_score_within_28_days",
   create_csv = TRUE
 )
@@ -112,7 +133,6 @@ vis_summary <- nsofa_scores %>%
   ) %>%
   select(-contains("above_zero"))
 
-write_csv(nsofa_summary, "output/nsofa_summary.csv")
-write_csv(drug_dose_summary, "output/nsofa_drug_summary.csv")
-write_csv(vis_summary, "output/nsofa_vis_summary.csv")
-
+write_csv(nsofa_summary, here("output", cohort, str_c(cohort, "_nsofa_summary.csv")))
+write_csv(drug_dose_summary, here("output", cohort, str_c(cohort, "_drug_dose_summary.csv")))
+write_csv(vis_summary, here("output", cohort, str_c(cohort, "_vis_summary.csv")))
