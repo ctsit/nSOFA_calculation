@@ -61,7 +61,7 @@ max_score_within_28_days <- get_max_score_within_n_hours_of_admission(
 
 nsofa_summary <- nsofa_scores %>%
   mutate(nsofa_above_zero = if_else(nsofa_score > 0, 1, 0)) %>%
-  group_by(child_mrn_uf) %>%
+  group_by(child_mrn_uf, admit_datetime, dischg_datetime, dischg_disposition) %>%
   summarise(across(c(platelets, oxygenation, cv, nsofa_score), list(max = max, sum = sum), .names = "{.col}_{fn}"),
             num_hours_nsofa_above_zero = sum(nsofa_above_zero),
             total_hospitalization_time_in_hours = n()
