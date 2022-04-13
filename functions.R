@@ -278,7 +278,7 @@ get_nsofa_dataset <- function(cohort, create_csv = FALSE) {
     mutate(nsofa_score = platelets + oxygenation + cv) 
   
   if (create_csv) {
-    write.csv(nsofa, here("output", cohort, paste0(cohort, "_nsofa_score.csv")), 
+    write.csv(nsofa, here("output", cohort, paste0(cohort, "_nsofa_score_", today(), ".csv")), 
               row.names = F, na = "")
   }
   
