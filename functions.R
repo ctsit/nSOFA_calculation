@@ -11,15 +11,10 @@ load_libraries <- function() {
   )
 }
 
-get_data <- function(file_name){
-  vroom(here("data", file_name), delim = ",") %>%
-    clean_names()
-}
-
 # Child Encounter ---------------------------------------------------------
 
-expand_child_encounter <- function() {
-  child_encounter <- get_data("child_encounter_data.csv") %>%  
+expand_child_encounter <- function(read_child_encounter) {
+  child_encounter <- read_child_encounter %>%  
     # choose first encounter when a subject has multiple encounters
     arrange(child_mrn_uf, admit_datetime) %>%  
     distinct(child_mrn_uf, .keep_all = T) %>% 
@@ -39,8 +34,8 @@ expand_child_encounter <- function() {
 
 # Platelets ---------------------------------------------------------------
 
-get_platelets <- function() {
-  platelets <- get_data("child_labs.csv") %>%
+get_platelets <- function(read_child_labs, child_encounter) {
+  platelets <- read_child_labs %>%
     # only choose subjects that are also in child_encounter data
     filter(child_mrn_uf %in% child_encounter$child_mrn_uf) %>% 
     filter(lab_name == 'PLATELET COUNT' & str_detect(lab_result, "\\d")) %>% 
@@ -103,12 +98,10 @@ align_drug_start_end_times <- function(df) {
 
 
 # Steroids ----------------------------------------------------------------
-get_steroids <- function() {
+get_steroids <- function(read_child_medications, child_encounter) {
   drug_route <- c("Intravenous", "Oral", "Per NG tube", "Per G Tube","Per OG Tube")
   
-  read_steroids <- get_data("child_medications.csv")
-  
-  steroids <- read_steroids %>%
+  steroids <- read_child_medications %>%
     # only choose subjects that are also in child_encounter data
     filter(child_mrn_uf %in% child_encounter$child_mrn_uf) %>%
     filter(str_detect(med_order_desc, "DEXAMETHASONE|HYDROCORTISONE|METHYLPREDNISOLONE") &
@@ -127,10 +120,9 @@ get_steroids <- function() {
 
 # Inotropes ---------------------------------------------------------------
 
-get_inotropes <- function() {
-  read_inotropes <- get_data("child_medications.csv")  
+get_inotropes <- function(read_medications, child_encounter) {
   
-  inotropes <- read_inotropes %>% 
+  inotropes <- read_medications %>% 
     filter(child_mrn_uf %in% child_encounter$child_mrn_uf) %>%
     filter(str_detect(med_order_desc,
                       paste0("DOBUTAMINE|DOPAMINE|EPINEPHRINE|MILRINONE|",
@@ -155,11 +147,9 @@ get_inotropes <- function() {
 
 # Oxygenation -------------------------------------------------------------
 
-get_oxygenation <- function() {
-  respiratory_devices <- read_excel("data/categorized_respiratory_devices.xlsx") %>% 
-    filter(intubated %in% c('yes', 'no'))
+get_oxygenation <- function(read_flowsheets, respiratory_devices) {
   
-  flowsheets <- get_data("child_flowsheets.csv") %>%
+  flowsheets <- read_flowsheets %>%
     filter(child_mrn_uf %in% child_encounter$child_mrn_uf) %>% 
     group_by(child_mrn_uf) %>% 
     mutate(q1hr = floor_date(recorded_time, "1 hour"))
@@ -270,7 +260,7 @@ get_oxygenation <- function() {
 
 # nsofa calculation -------------------------------------------------------
 
-get_nsofa_dataset <- function(create_csv = FALSE) {
+get_nsofa_dataset <- function(cohort, create_csv = FALSE) {
   nsofa <- list(child_encounter, platelets, steroids, 
                 inotropes, oxygenation) %>% 
     reduce(left_join, by = c("child_mrn_uf", "q1hr")) %>%  
@@ -288,7 +278,7 @@ get_nsofa_dataset <- function(create_csv = FALSE) {
     mutate(nsofa_score = platelets + oxygenation + cv) 
   
   if (create_csv) {
-    write.csv(nsofa, here("output", paste0("nsofa_score_", today(), ".csv")), 
+    write.csv(nsofa, here("output", cohort, paste0(cohort, "_nsofa_data_", today(), ".csv")), 
               row.names = F, na = "")
   }
   
@@ -297,6 +287,7 @@ get_nsofa_dataset <- function(create_csv = FALSE) {
   
 get_max_score_within_n_hours_of_admission <- function(min_hour,
                                                       max_hour, 
+                                                      cohort,
                                                       filename = NULL,
                                                       create_csv = FALSE) {
   max_score <- nsofa_scores %>% 
@@ -310,7 +301,7 @@ get_max_score_within_n_hours_of_admission <- function(min_hour,
               dischg_disposition = unique(dischg_disposition))
   
   if (create_csv) {
-    write.csv(max_score, here("output", paste0(filename,"_", today(), ".csv")), 
+    write.csv(max_score, here("output", cohort, paste0(cohort, "_", filename, ".csv")), 
               row.names = F, na = "")
   }
   
